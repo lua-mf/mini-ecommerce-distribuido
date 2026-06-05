@@ -90,13 +90,13 @@ Invoke-RestMethod -Uri "http://localhost:8000/users/register" -Method Post -Cont
 ### 2. Login e armazenamento automatizado do Token JWT
 Para evitar truncamento de texto ou cópia incompleta de strings longas com reticências (`...`), execute o bloco abaixo para autenticar e salvar o token real diretamente na variável de sessão `$TOKEN`:
 ```powershell
-\$RESPOSTA = Invoke-RestMethod -Uri "http://localhost:8000/users/login" -Method Post -ContentType "application/json" -Body '{"email":"admin@loja.com","password":"senha123"}'
-TOKEN = RESPOSTA.token
+$RESPOSTA = Invoke-RestMethod -Uri "http://localhost:8000/users/login" -Method Post -ContentType "application/json" -Body '{"email":"admin@loja.com","password":"senha123"}'
+$TOKEN = $RESPOSTA.token
 ```
 
 ### 3. Criar produto (requer JWT de admin)
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:8000/products" -Method Post -Headers @{"Authorization"="Bearer \$TOKEN"} -ContentType "application/json" -Body '{"name":"Notebook Dell","price":3500.00,"stock":10,"description":"Notebook i7 16GB"}'
+Invoke-RestMethod -Uri "http://localhost:8000/products" -Method Post -Headers @{"Authorization"="Bearer $TOKEN"} -ContentType "application/json" -Body '{"name":"Notebook Dell","price":3500.00,"stock":10,"description":"Notebook i7 16GB"}'
 ```
 
 ### 4. Listar produtos (sem autenticação)
@@ -106,13 +106,13 @@ Invoke-RestMethod -Uri "http://localhost:8000/products" -Method Get
 
 ### 5. Criar pedido (requer JWT)
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:8000/orders" -Method Post -Headers @{"Authorization"="Bearer \$TOKEN"} -ContentType "application/json" -Body '{"items":[{"productId":"1","name":"Notebook Dell","price":3500.00,"quantity":1}]}'
+Invoke-RestMethod -Uri "http://localhost:8000/orders" -Method Post -Headers @{"Authorization"="Bearer $TOKEN"} -ContentType "application/json" -Body '{"items":[{"productId":"1","name":"Notebook Dell","price":3500.00,"quantity":1}]}'
 ```
 
 ### 6. Ver pedidos específicos do usuário
 Substitua o número final pelo ID do pedido gerado pelo sistema.
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:8000/orders/1" -Method Get -Headers @{"Authorization"="Bearer \$TOKEN"}
+Invoke-RestMethod -Uri "http://localhost:8000/orders/1" -Method Get -Headers @{"Authorization"="Bearer $TOKEN"}
 ```
 
 ### 7. Ver status global de integração (heartbeat)

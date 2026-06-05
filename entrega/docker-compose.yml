@@ -1,0 +1,99 @@
+version: "3.9"
+
+services:
+  users:
+    build:
+      context: ./users
+    ports:
+      - "5001:5001"
+    environment:
+      PORT: 5001
+      JWT_SECRET: super-secret-ecommerce-key-2024
+    volumes:
+      - users_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  products:
+    build:
+      context: ./products
+    ports:
+      - "5002:5002"
+    environment:
+      PORT: 5002
+      JWT_SECRET: super-secret-ecommerce-key-2024
+      IS_REPLICA: "false"
+      REPLICA_URL: "http://products_replica:5012"
+      DATA_FILE: "/app/data/products.json"
+    volumes:
+      - products_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5002/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  products_replica:
+    build:
+      context: ./products
+    ports:
+      - "5012:5012"
+    environment:
+      PORT: 5012
+      JWT_SECRET: super-secret-ecommerce-key-2024
+      IS_REPLICA: "true"
+      DATA_FILE: "/app/data/products_replica.json"
+    volumes:
+      - products_replica_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5012/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  orders:
+    build:
+      context: ./orders
+    ports:
+      - "5003:5003"
+    environment:
+      PORT: 5003
+      JWT_SECRET: super-secret-ecommerce-key-2024
+    volumes:
+      - orders_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5003/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - "8000:8000"
+    environment:
+      USERS_URL: "http://users:5001"
+      PRODUCTS_URL: "http://products:5002"
+      PRODUCTS_REPLICA_URL: "http://products_replica:5012"
+      ORDERS_URL: "http://orders:5003"
+      JWT_SECRET: super-secret-ecommerce-key-2024
+    depends_on:
+      - users
+      - products
+      - products_replica
+      - orders
+    restart: unless-stopped
+
+volumes:
+  users_data:
+  products_data:
+  products_replica_data:
+  orders_data:

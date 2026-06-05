@@ -10,7 +10,7 @@
 ## Opção A — Docker Compose (recomendado)
 
 ```bash
-# Na raiz do projeto (pasta entrega/)
+# Na raiz do projeto 
 docker-compose up --build
 ```
 
